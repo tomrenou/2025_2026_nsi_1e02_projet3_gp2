@@ -12,12 +12,12 @@ Jeu d'aventure 2D :
 - 
 
 Structures :
-main.py
-player.py
-enemy.py
-level.py
-settings.py
-assets/
+- main.py
+- player.py
+- enemy.py
+- level.py
+- settings.py
+- assets
   images
   sounds
   utils
