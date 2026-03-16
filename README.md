@@ -10,3 +10,14 @@ Jeu d'aventure 2D :
 - Action
 - Enemies
 - 
+
+Structures :
+main.py
+player.py
+enemy.py
+level.py
+settings.py
+assets/
+  images
+  sounds
+  utils
