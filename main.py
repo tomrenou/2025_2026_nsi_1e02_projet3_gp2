@@ -1,4 +1,5 @@
 import tkinter as tk
+import pygame
 
 # Taille de la fenêtre
 WINDOW_WIDTH = 800
