@@ -15,7 +15,7 @@ Structures :
 - main.py
 - player.py
 - enemy.py
-- level.py
+- levels.py
 - settings.py
 - assets
   images
