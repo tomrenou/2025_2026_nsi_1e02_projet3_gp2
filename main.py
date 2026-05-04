@@ -80,7 +80,7 @@ while running:
                         print(f"Thème changé : {theme_name}")
                 if back_button.collidepoint(event.pos):
                     menu = True
-                    in_settings = False
+                    in_settings = False 
 
     if menu:
         # Menu principal
