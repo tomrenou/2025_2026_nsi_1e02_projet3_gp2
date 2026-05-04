@@ -42,3 +42,21 @@ class Level1:
         #ajouter du gameplay ici (collisions, ennemis, etc.)
         pass
 
+from player import Player
+
+class Level1:
+    def __init__(self, screen):
+        self.screen = screen
+        self.ground = pygame.Rect(0, 550, 800, 50)
+        self.platforms = [...]
+        self.obstacles = [...]
+
+        # Ajout du joueur
+        self.player = Player(100, 470)
+
+    def update(self):
+        self.player.update(self.ground, self.platforms, self.obstacles)
+
+    def draw(self):
+        # Sol, plateformes, obstacles...
+        self.player.draw(self.screen)
