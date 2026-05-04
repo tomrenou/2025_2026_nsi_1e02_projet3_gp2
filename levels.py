@@ -39,5 +39,5 @@ class Level1:
             pygame.draw.rect(self.screen, RED, o)
 
     def update(self):
-        # Tu pourras ajouter du gameplay ici (collisions, ennemis, etc.)
+        #ajouter du gameplay ici (collisions, ennemis, etc.)
         pass
