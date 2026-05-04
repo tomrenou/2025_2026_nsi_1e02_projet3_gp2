@@ -111,8 +111,8 @@ while running:
         if level is None:
             level = Level1(screen)
 
-    level.update()
-    level.draw()
+        level.update()
+        level.draw()
 
 
 

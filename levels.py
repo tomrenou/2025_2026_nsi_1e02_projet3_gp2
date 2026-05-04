@@ -41,3 +41,4 @@ class Level1:
     def update(self):
         #ajouter du gameplay ici (collisions, ennemis, etc.)
         pass
+
