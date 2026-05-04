@@ -1,4 +1,5 @@
 import pygame
+from player import Player
 
 WHITE = (255, 255, 255)
 GREY = (120, 120, 120)
@@ -19,44 +20,27 @@ class Level1:
             pygame.Rect(150, 250, 180, 20)
         ]
 
-        # Obstacles (ex: blocs rouges)
+        # Obstacles
         self.obstacles = [
             pygame.Rect(350, 520, 40, 30),
             pygame.Rect(600, 520, 40, 30),
             pygame.Rect(250, 430, 30, 20)
         ]
 
-    def draw(self):
-        # Sol
-        pygame.draw.rect(self.screen, GREEN, self.ground)
-
-        # Plateformes
-        for p in self.platforms:
-            pygame.draw.rect(self.screen, GREY, p)
-
-        # Obstacles
-        for o in self.obstacles:
-            pygame.draw.rect(self.screen, RED, o)
-
-    def update(self):
-        #ajouter du gameplay ici (collisions, ennemis, etc.)
-        pass
-
-from player import Player
-
-class Level1:
-    def __init__(self, screen):
-        self.screen = screen
-        self.ground = pygame.Rect(0, 550, 800, 50)
-        self.platforms = [...]
-        self.obstacles = [...]
-
-        # Ajout du joueur
+        # Joueur
         self.player = Player(100, 470)
 
     def update(self):
         self.player.update(self.ground, self.platforms, self.obstacles)
 
     def draw(self):
-        # Sol, plateformes, obstacles...
+        # Sol
+        pygame.draw.rect(self.screen, GREEN, self.ground)
+        # Plateformes
+        for p in self.platforms:
+            pygame.draw.rect(self.screen, GREY, p)
+        # Obstacles
+        for o in self.obstacles:
+            pygame.draw.rect(self.screen, RED, o)
+        # Joueur
         self.player.draw(self.screen)
