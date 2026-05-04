@@ -4,7 +4,13 @@ WHITE = (255, 255, 255)
 
 class Player:
     def __init__(self, x, y):
-        self.rect = pygame.Rect(x, y, 40, 60)
+        # Charge l'image
+        self.image = pygame.image.load("Lior.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (40, 60))
+
+        # La hitbox
+        self.rect = self.image.get_rect(topleft=(x, y))
+
         self.vel_x = 0
         self.vel_y = 0
         self.on_ground = False
@@ -56,4 +62,4 @@ class Player:
         self.move_and_collide(ground, platforms, obstacles)
 
     def draw(self, screen):
-        pygame.draw.rect(screen, WHITE, self.rect)
+        screen.blit(self.image, self.rect)
