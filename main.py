@@ -1,4 +1,6 @@
 import pygame
+from levels import Level1
+
 
 # Initialisation
 pygame.init()
@@ -42,6 +44,7 @@ back_button = pygame.Rect((WIDTH - button_width)//2, 500, button_width, button_h
 running = True
 menu = True
 in_settings = False
+level = None
 
 def draw_button(rect, text, mouse_pos, base_color, hover_color):
     if rect.collidepoint(mouse_pos):
@@ -104,9 +107,14 @@ while running:
         draw_button(back_button, "Retour", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
     else:
-        # Écran jeu
-        game_text = title_font.render("JEU EN COURS", True, current_theme["title"])
-        screen.blit(game_text, ((WIDTH - game_text.get_width())//2, HEIGHT//2 - game_text.get_height()//2))
+        # Écran jeu → Niveau 1
+        if level is None:
+            level = Level1(screen)
+
+    level.update()
+    level.draw()
+
+
 
     pygame.display.flip()
     clock.tick(60)
