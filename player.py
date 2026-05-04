@@ -6,7 +6,7 @@ class Player:
     def __init__(self, x, y):
         # Charge l'image
         self.image = pygame.image.load("Lior.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (50, 80))
+        self.image = pygame.transform.scale(self.image, (60, 60))
 
         # La hitbox
         self.rect = self.image.get_rect(topleft=(x, y))
