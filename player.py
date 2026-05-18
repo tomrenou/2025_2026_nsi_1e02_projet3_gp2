@@ -4,38 +4,39 @@ WHITE = (255, 255, 255)
 
 class Player:
     def __init__(self, x, y):
-        # Charge l'image
+        # Image joueur
         self.image = pygame.image.load("Lior.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (60, 60))
-        self.lives = 3
-        self.score = 0
-        self.has_weapon = False
-        self.invincible = False
-        self.invincible_timer = 0
-        for obstacle in obstacles:
-            if self.rect.colliderect(obstacle) and not self.invincible:
-                self.lives -= 1
-                self.rect.topleft = (100, 470)
-                self.invincible = True
-                self.invincible_timer = 60
 
-        # La hitbox
+        # Hitbox
         self.rect = self.image.get_rect(topleft=(x, y))
 
+        # Mouvement
         self.vel_x = 0
         self.vel_y = 0
-        self.on_ground = False
         self.speed = 5
         self.jump_force = -15
         self.gravity = 0.8
+        self.on_ground = False
+
+        # Stats
+        self.lives = 3
+        self.score = 0
+        self.has_weapon = False
+
+        # Invincibilité temporaire
+        self.invincible = False
+        self.invincible_timer = 0
 
     def handle_input(self):
         keys = pygame.key.get_pressed()
         self.vel_x = 0
+
         if keys[pygame.K_LEFT] or keys[pygame.K_q]:
             self.vel_x = -self.speed
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.vel_x = self.speed
+
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_z]) and self.on_ground:
             self.vel_y = self.jump_force
             self.on_ground = False
@@ -45,10 +46,15 @@ class Player:
 
     def move_and_collide(self, ground, platforms, obstacles):
         all_solids = [ground] + platforms + obstacles
+
+        # Collision obstacles dangereux
         for obstacle in obstacles:
-            if self.rect.colliderect(obstacle):
-               self.lives -= 1
-            self.rect.topleft = (100, 470)  # respawn
+            if self.rect.colliderect(obstacle) and not self.invincible:
+                self.lives -= 1
+                self.rect.topleft = (100, 470)  # respawn
+                self.invincible = True
+                self.invincible_timer = 60
+
         # Déplacement horizontal
         self.rect.x += self.vel_x
         for solid in all_solids:
@@ -74,6 +80,8 @@ class Player:
         self.handle_input()
         self.apply_gravity()
         self.move_and_collide(ground, platforms, obstacles)
+
+        # Timer invincibilité
         if self.invincible:
             self.invincible_timer -= 1
             if self.invincible_timer <= 0:

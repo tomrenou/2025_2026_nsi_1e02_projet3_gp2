@@ -59,6 +59,9 @@ class Level1:
         pygame.draw.rect(self.screen, GREEN, self.ground)
         for i in range(self.player.lives):
             self.screen.blit(self.heart, (10 + i * 45, 10))
+        font = pygame.font.SysFont(None, 40)
+        lives_text = font.render(f"Vies: {self.player.lives}", True, WHITE)
+        self.screen.blit(lives_text, (10, 10))
 
         # Plateformes
         for p in self.platforms:
@@ -74,3 +77,4 @@ class Level1:
 
         # Joueur
         self.player.draw(self.screen)
+
