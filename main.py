@@ -1,7 +1,6 @@
 import pygame
 from levels import Level1
 
-
 # Initialisation
 pygame.init()
 WIDTH, HEIGHT = 800, 600
@@ -32,25 +31,24 @@ settings_button = pygame.Rect((WIDTH - button_width)//2, 350, button_width, butt
 quit_button = pygame.Rect((WIDTH - button_width)//2, 450, button_width, button_height)
 
 # Boutons paramètres
+colors_button = pygame.Rect((WIDTH - button_width)//2, 200, button_width, button_height)
+character_button = pygame.Rect((WIDTH - button_width)//2, 300, button_width, button_height)
+fullscreen_button = pygame.Rect((WIDTH - button_width)//2, 400, button_width, button_height)
+back_button = pygame.Rect((WIDTH - button_width)//2, 500, button_width, button_height)
+
+# Sous-menu couleurs
 theme_buttons = []
 y = 200
 for theme_name in themes:
     rect = pygame.Rect((WIDTH - button_width)//2, y, button_width, button_height)
     theme_buttons.append((rect, theme_name))
     y += 100
-back_button = pygame.Rect((WIDTH - button_width)//2, 500, button_width, button_height)
-
-# Bouton choisir personnage
-character_button = pygame.Rect((WIDTH - button_width)//2, 350, button_width, button_height)
-
-# Bouton plein écran
-fullscreen_button = pygame.Rect((WIDTH - button_width)//2, 450, button_width, button_height)
-back_button = pygame.Rect((WIDTH - button_width)//2, 500, button_width, button_height)
 
 # États du menu
 running = True
 menu = True
 in_settings = False
+in_color_menu = False
 level = None
 
 # Variables
@@ -75,6 +73,8 @@ while running:
             running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
+
+            # MENU PRINCIPAL
             if menu:
                 if play_button.collidepoint(event.pos):
                     print("Jouer cliqué !")
@@ -84,27 +84,42 @@ while running:
                     menu = False
                 if quit_button.collidepoint(event.pos):
                     running = False
+
+            # PARAMÈTRES
             elif in_settings:
-                for rect, theme_name in theme_buttons:
-                    if rect.collidepoint(event.pos):
-                        current_theme = themes[theme_name]
-                        print(f"Thème changé : {theme_name}")
-                        # Choisir personnage
+
+                if colors_button.collidepoint(event.pos):
+                    in_settings = False
+                    in_color_menu = True
+
                 if character_button.collidepoint(event.pos):
-                    print("Menu choix du personnage (à venir)")
-                # Plein écran
+                    print("Menu personnage (à venir)")
+
                 if fullscreen_button.collidepoint(event.pos):
                     fullscreen = not fullscreen
                     if fullscreen:
                         screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
                     else:
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
                 if back_button.collidepoint(event.pos):
                     menu = True
-                    in_settings = False 
+                    in_settings = False
 
+            # SOUS-MENU COULEURS
+            elif in_color_menu:
+
+                for rect, theme_name in theme_buttons:
+                    if rect.collidepoint(event.pos):
+                        current_theme = themes[theme_name]
+                        print(f"Thème changé : {theme_name}")
+
+                if back_button.collidepoint(event.pos):
+                    in_color_menu = False
+                    in_settings = True
+
+    # AFFICHAGE MENU PRINCIPAL
     if menu:
-        # Menu principal
         title_text = title_font.render("Lior's Adventures", True, current_theme["title"])
         screen.blit(title_text, ((WIDTH - title_text.get_width())//2, 100))
 
@@ -115,36 +130,41 @@ while running:
         draw_button(quit_button, "Quitter", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
 
+    # AFFICHAGE PARAMÈTRES
     elif in_settings:
-        # Écran Paramètres
         settings_text = title_font.render("Paramètres", True, current_theme["title"])
         screen.blit(settings_text, ((WIDTH - settings_text.get_width())//2, 50))
 
-        # Boutons thèmes
-        for rect, theme_name in theme_buttons:
-            draw_button(rect, theme_name, mouse_pos,
-                        current_theme["btn_base"], current_theme["btn_hover"])
-        # Bouton personnage
+        draw_button(colors_button, "Couleurs", mouse_pos,
+                    current_theme["btn_base"], current_theme["btn_hover"])
         draw_button(character_button, "Personnage", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
-
-        # Bouton plein écran
         draw_button(fullscreen_button,
                     "Plein écran" if not fullscreen else "Fenêtré",
                     mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
+        draw_button(back_button, "Retour", mouse_pos,
+                    current_theme["btn_base"], current_theme["btn_hover"])
+
+    # AFFICHAGE SOUS-MENU COULEURS
+    elif in_color_menu:
+        settings_text = title_font.render("Couleurs", True, current_theme["title"])
+        screen.blit(settings_text, ((WIDTH - settings_text.get_width())//2, 50))
+
+        for rect, theme_name in theme_buttons:
+            draw_button(rect, theme_name, mouse_pos,
+                        current_theme["btn_base"], current_theme["btn_hover"])
 
         draw_button(back_button, "Retour", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
+
+    # JEU
     else:
-        # Écran jeu → Niveau 1
         if level is None:
             level = Level1(screen)
 
         level.update()
         level.draw()
-
-
 
     pygame.display.flip()
     clock.tick(60)
