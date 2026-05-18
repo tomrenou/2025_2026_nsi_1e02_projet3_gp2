@@ -13,6 +13,14 @@ class Level1:
         self.heart = pygame.image.load("heart.png").convert_alpha()
         self.heart = pygame.transform.scale(self.heart, (40, 40))
 
+        self.coins = [
+            pygame.Rect(200, 420, 20, 20),
+            pygame.Rect(500, 320, 20, 20),
+            pygame.Rect(180, 220, 20, 20)
+        ]
+
+        self.weapon = pygame.Rect(700, 500, 30, 30)
+
         # Sol
         self.ground = pygame.Rect(0, 550, 800, 50)
 
@@ -54,6 +62,19 @@ class Level1:
                 # Reset position du joueur
                 self.player.rect.topleft = (100, 470)
 
+        self.player.update(self.ground, self.platforms, self.obstacles)
+
+        # ramassage pièces
+        for coin in self.coins[:]:
+            if self.player.rect.colliderect(coin):
+                self.coins.remove(coin)
+                self.player.score += 10
+
+        # ramassage arme
+        if self.weapon and self.player.rect.colliderect(self.weapon):
+            self.player.has_weapon = True
+            self.weapon = None
+
     def draw(self):
         # Sol
         pygame.draw.rect(self.screen, GREEN, self.ground)
@@ -74,4 +95,16 @@ class Level1:
 
         # Joueur
         self.player.draw(self.screen)
+
+        font = pygame.font.SysFont(None, 35)
+
+        score_text = font.render(f"Score: {self.player.score}", True, WHITE)
+        self.screen.blit(score_text, (650, 10))
+
+        weapon_text = font.render(
+            f"Arme: {'Oui' if self.player.has_weapon else 'Non'}",
+            True,
+            WHITE
+        )
+        self.screen.blit(weapon_text, (620, 45))
 

@@ -28,6 +28,8 @@ class Player:
         self.invincible = False
         self.invincible_timer = 0
 
+        self.bullets = []
+
     def handle_input(self):
         keys = pygame.key.get_pressed()
         self.vel_x = 0
@@ -40,6 +42,9 @@ class Player:
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_z]) and self.on_ground:
             self.vel_y = self.jump_force
             self.on_ground = False
+        if keys[pygame.K_f] and self.has_weapon:
+            bullet = pygame.Rect(self.rect.centerx, self.rect.centery, 15, 5)
+            self.bullets.append(bullet)
 
     def apply_gravity(self):
         self.vel_y += self.gravity
@@ -80,6 +85,9 @@ class Player:
         self.handle_input()
         self.apply_gravity()
         self.move_and_collide(ground, platforms, obstacles)
+        for bullet in self.bullets:
+            bullet.x += 10
+        self.bullets = [b for b in self.bullets if b.x < 800]
 
         # Timer invincibilité
         if self.invincible:
@@ -89,3 +97,7 @@ class Player:
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+        screen.blit(self.image, self.rect)
+
+        for bullet in self.bullets:
+            pygame.draw.rect(screen, (255, 255, 0), bullet)
