@@ -7,6 +7,17 @@ class Player:
         # Charge l'image
         self.image = pygame.image.load("Lior.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (60, 60))
+        self.lives = 3
+        self.score = 0
+        self.has_weapon = False
+        self.invincible = False
+        self.invincible_timer = 0
+        for obstacle in obstacles:
+            if self.rect.colliderect(obstacle) and not self.invincible:
+                self.lives -= 1
+                self.rect.topleft = (100, 470)
+                self.invincible = True
+                self.invincible_timer = 60
 
         # La hitbox
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -34,7 +45,10 @@ class Player:
 
     def move_and_collide(self, ground, platforms, obstacles):
         all_solids = [ground] + platforms + obstacles
-
+        for obstacle in obstacles:
+            if self.rect.colliderect(obstacle):
+               self.lives -= 1
+            self.rect.topleft = (100, 470)  # respawn
         # Déplacement horizontal
         self.rect.x += self.vel_x
         for solid in all_solids:
@@ -60,6 +74,10 @@ class Player:
         self.handle_input()
         self.apply_gravity()
         self.move_and_collide(ground, platforms, obstacles)
+        if self.invincible:
+            self.invincible_timer -= 1
+            if self.invincible_timer <= 0:
+                self.invincible = False
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

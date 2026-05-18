@@ -10,6 +10,8 @@ RED = (200, 50, 50)
 class Level1:
     def __init__(self, screen):
         self.screen = screen
+        self.heart = pygame.image.load("heart.png").convert_alpha()
+        self.heart = pygame.transform.scale(self.heart, (40, 40))
 
         # Sol
         self.ground = pygame.Rect(0, 550, 800, 50)
@@ -55,6 +57,8 @@ class Level1:
     def draw(self):
         # Sol
         pygame.draw.rect(self.screen, GREEN, self.ground)
+        for i in range(self.player.lives):
+            self.screen.blit(self.heart, (10 + i * 45, 10))
 
         # Plateformes
         for p in self.platforms:
