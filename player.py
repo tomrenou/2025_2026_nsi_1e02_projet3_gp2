@@ -15,8 +15,8 @@ class Player:
         # Mouvement
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 5
-        self.jump_force = -15
+        self.speed = 3
+        self.jump_force = -12
         self.gravity = 0.8
         self.on_ground = False
 
