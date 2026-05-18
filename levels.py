@@ -39,13 +39,14 @@ class Level1:
         ]
 
         # Joueur
-        self.player = Player(100, 470)
+        self.player = Player(180, 190)
 
         # ENNEMIS (nouveau)
         self.enemies = [
             Enemy(0, 490, 0, 300),        # Ennemi qui patrouille à gauche
             Enemy(500, 490, 500, 750)     # Ennemi qui patrouille à droite
         ]
+        self.enemy_respawn_timer = 0
 
     def update(self):
         self.player.update(self.ground, self.platforms, self.obstacles)
@@ -55,12 +56,30 @@ class Level1:
 
         # Collision joueur / ennemi
         for enemy in self.enemies:
-            if self.player.rect.colliderect(enemy.rect):
-                print("Le joueur a été touché !")
-                # Reset position du joueur
-                self.player.rect.topleft = (100, 470)
+            if self.player.rect.colliderect(enemy.rect) and not self.player.invincible:
+                self.player.lives -= 1
+                self.player.rect.topleft = (180, 190)
+                self.player.invincible = True
+                self.player.invincible_timer = 60
+        for bullet in self.player.bullets[:]:
+            for enemy in self.enemies[:]:
+                if bullet.colliderect(enemy.rect):
+                    self.player.bullets.remove(bullet)
+                    self.enemies.remove(enemy)
+                    self.player.score += 50
+                    break
+        if len(self.enemies) == 0:
+            if self.enemy_respawn_timer == 0:
+                self.enemy_respawn_timer = 300
+            else:
+                self.enemy_respawn_timer -= 1
 
-        self.player.update(self.ground, self.platforms, self.obstacles)
+                if self.enemy_respawn_timer <= 0:
+                    self.enemies = [
+                        Enemy(0, 490, 0, 300),
+                        Enemy(500, 490, 500, 750)
+                    ]
+                    self.enemy_respawn_timer = 0
 
         # ramassage pièces
         for coin in self.coins[:]:
@@ -109,4 +128,5 @@ class Level1:
             WHITE
         )
         self.screen.blit(weapon_text, (620, 45))
+        
 
