@@ -27,10 +27,4 @@ Utilisations :
 - GitHubt
 - Vscode
 
-
-
-Le héros (Lior) vit dans un village.
-Un mal ancien (Nocthra) se réveille.
-Il doit battre 3 boss.
-Récupérer 3 cristaux.
-Et battre Nocthra.
+Un jeu 2D dans lequel le personnage doit ramasser des pièces tout en combattant des monstres de plus en plu fort.
