@@ -48,10 +48,8 @@ class Level1:
         ]
 
     def update(self):
-        # Mise à jour du joueur
         self.player.update(self.ground, self.platforms, self.obstacles)
 
-        # Mise à jour des ennemis
         for enemy in self.enemies:
             enemy.update()
 
@@ -76,24 +74,28 @@ class Level1:
             self.weapon = None
 
     def draw(self):
-        # Sol
         pygame.draw.rect(self.screen, GREEN, self.ground)
+
         for i in range(self.player.lives):
             self.screen.blit(self.heart, (10 + i * 45, 10))
-        
-        # Plateformes
+
         for p in self.platforms:
             pygame.draw.rect(self.screen, GREY, p)
 
-        # Obstacles
         for o in self.obstacles:
             pygame.draw.rect(self.screen, RED, o)
 
-        # ENNEMIS
+        # Pièces
+        for coin in self.coins:
+            pygame.draw.circle(self.screen, (255, 215, 0), coin.center, 10)
+
+        # Arme
+        if self.weapon:
+            pygame.draw.rect(self.screen, (0, 0, 255), self.weapon)
+
         for enemy in self.enemies:
             enemy.draw(self.screen)
 
-        # Joueur
         self.player.draw(self.screen)
 
         font = pygame.font.SysFont(None, 35)

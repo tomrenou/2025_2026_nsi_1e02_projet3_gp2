@@ -7,6 +7,7 @@ class Player:
         # Image joueur
         self.image = pygame.image.load("Lior.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (60, 60))
+        self.shoot_cooldown = 0
 
         # Hitbox
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -45,6 +46,10 @@ class Player:
         if keys[pygame.K_f] and self.has_weapon:
             bullet = pygame.Rect(self.rect.centerx, self.rect.centery, 15, 5)
             self.bullets.append(bullet)
+        if keys[pygame.K_f] and self.has_weapon and self.shoot_cooldown == 0:
+            bullet = pygame.Rect(self.rect.centerx, self.rect.centery, 15, 5)
+            self.bullets.append(bullet)
+            self.shoot_cooldown = 20
 
     def apply_gravity(self):
         self.vel_y += self.gravity
@@ -88,6 +93,8 @@ class Player:
         for bullet in self.bullets:
             bullet.x += 10
         self.bullets = [b for b in self.bullets if b.x < 800]
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
 
         # Timer invincibilité
         if self.invincible:
@@ -97,7 +104,6 @@ class Player:
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-        screen.blit(self.image, self.rect)
-
+        
         for bullet in self.bullets:
             pygame.draw.rect(screen, (255, 255, 0), bullet)
