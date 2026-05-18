@@ -124,11 +124,11 @@ while running:
         for rect, theme_name in theme_buttons:
             draw_button(rect, theme_name, mouse_pos,
                         current_theme["btn_base"], current_theme["btn_hover"])
-        # ➕ AJOUT : Bouton personnage
+        # AJOUT : Bouton personnage
         draw_button(character_button, "Personnage", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
 
-        # ➕ AJOUT : Bouton plein écran
+        # AJOUT : Bouton plein écran
         draw_button(fullscreen_button,
                     "Plein écran" if not fullscreen else "Fenêtré",
                     mouse_pos,
