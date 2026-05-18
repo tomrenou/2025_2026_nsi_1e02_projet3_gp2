@@ -75,30 +75,15 @@ class Player:
     def move_and_collide(self, ground, platforms, obstacles):
         all_solids = [ground] + platforms + obstacles
 
-        # Collision obstacles dangereux
+        # Collision obstacles
         for obstacle in obstacles:
-            def update(self):
-                self.player.update(self.ground, self.platforms, self.obstacles)
-
-        for enemy in self.enemies:
-            enemy.update()
-
-        # Collision joueur / ennemi
-        for enemy in self.enemies:
             if self.rect.colliderect(obstacle) and not self.invincible:
                 self.lives -= 1
                 self.rect.topleft = (180, 190)
                 self.invincible = True
                 self.invincible_timer = 60
-        for bullet in self.player.bullets[:]:
-            for enemy in self.enemies[:]:
-                if bullet.colliderect(enemy.rect):
-                    self.player.bullets.remove(bullet)
-                    self.enemies.remove(enemy)
-                    self.player.score += 50
-                    break
 
-        # Déplacement horizontal
+        # horizontal
         self.rect.x += self.vel_x
         for solid in all_solids:
             if self.rect.colliderect(solid):
@@ -107,7 +92,7 @@ class Player:
                 elif self.vel_x < 0:
                     self.rect.left = solid.right
 
-        # Déplacement vertical
+        # vertical
         self.on_ground = False
         self.rect.y += self.vel_y
         for solid in all_solids:
