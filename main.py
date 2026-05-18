@@ -44,16 +44,28 @@ for theme_name in themes:
     theme_buttons.append((rect, theme_name))
     y += 100
 
+# Sous-menu personnages (boutons à gauche)
+character_choices = [
+    ("Lior", pygame.Rect(50, 200, 250, 60)),
+    ("Lior de glace", pygame.Rect(50, 280, 250, 60)),
+    ("Lior ténébreux", pygame.Rect(50, 360, 250, 60)),
+    ("Lior de feu", pygame.Rect(50, 440, 250, 60)),
+]
+
+# Rectangle d’aperçu à droite
+preview_rect = pygame.Rect(400, 200, 350, 300)
+
 # États du menu
 running = True
 menu = True
 in_settings = False
 in_color_menu = False
+in_character_menu = False
 level = None
 
 # Variables
 fullscreen = False
-selected_character = None  # pour plus tard
+selected_character = "Lior"  # par défaut
 
 def draw_button(rect, text, mouse_pos, base_color, hover_color):
     if rect.collidepoint(mouse_pos):
@@ -77,7 +89,6 @@ while running:
             # MENU PRINCIPAL
             if menu:
                 if play_button.collidepoint(event.pos):
-                    print("Jouer cliqué !")
                     menu = False
                 if settings_button.collidepoint(event.pos):
                     in_settings = True
@@ -93,7 +104,8 @@ while running:
                     in_color_menu = True
 
                 if character_button.collidepoint(event.pos):
-                    print("Menu personnage (à venir)")
+                    in_settings = False
+                    in_character_menu = True
 
                 if fullscreen_button.collidepoint(event.pos):
                     fullscreen = not fullscreen
@@ -112,10 +124,21 @@ while running:
                 for rect, theme_name in theme_buttons:
                     if rect.collidepoint(event.pos):
                         current_theme = themes[theme_name]
-                        print(f"Thème changé : {theme_name}")
 
                 if back_button.collidepoint(event.pos):
                     in_color_menu = False
+                    in_settings = True
+
+            # SOUS-MENU PERSONNAGES
+            elif in_character_menu:
+
+                for name, rect in character_choices:
+                    if rect.collidepoint(event.pos):
+                        selected_character = name
+                        print("Personnage choisi :", name)
+
+                if back_button.collidepoint(event.pos):
+                    in_character_menu = False
                     in_settings = True
 
     # AFFICHAGE MENU PRINCIPAL
@@ -154,6 +177,27 @@ while running:
         for rect, theme_name in theme_buttons:
             draw_button(rect, theme_name, mouse_pos,
                         current_theme["btn_base"], current_theme["btn_hover"])
+
+        draw_button(back_button, "Retour", mouse_pos,
+                    current_theme["btn_base"], current_theme["btn_hover"])
+
+    # AFFICHAGE SOUS-MENU PERSONNAGES
+    elif in_character_menu:
+        settings_text = title_font.render("Personnages", True, current_theme["title"])
+        screen.blit(settings_text, ((WIDTH - settings_text.get_width())//2, 50))
+
+        # Boutons à gauche
+        for name, rect in character_choices:
+            draw_button(rect, name, mouse_pos,
+                        current_theme["btn_base"], current_theme["btn_hover"])
+
+        # Aperçu à droite
+        pygame.draw.rect(screen, WHITE, preview_rect, 3)
+
+        preview_label = button_font.render(selected_character, True, WHITE)
+        screen.blit(preview_label, (preview_rect.x + 20, preview_rect.y + 20))
+
+        # Ici tu mettras plus tard l’image du perso choisi
 
         draw_button(back_button, "Retour", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
