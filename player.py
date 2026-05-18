@@ -15,8 +15,8 @@ class Player:
         # Mouvement
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 3
-        self.jump_force = -12
+        self.speed = 2
+        self.jump_force = -14
         self.gravity = 0.8
         self.on_ground = False
 
@@ -27,7 +27,7 @@ class Player:
 
         # Invincibilité temporaire
         self.invincible = False
-        self.invincible_timer = 0
+        self.invincible_timer = 1
 
         self.bullets = []
 
