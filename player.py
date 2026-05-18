@@ -8,6 +8,10 @@ class Player:
         self.image = pygame.image.load("Lior.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (60, 60))
         self.shoot_cooldown = 0
+        self.ammo = 6
+        self.max_ammo = 6
+        self.reloading = False
+        self.reload_timer = 0
 
         # Hitbox
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -50,6 +54,20 @@ class Player:
             bullet = pygame.Rect(self.rect.centerx, self.rect.centery, 15, 5)
             self.bullets.append(bullet)
             self.shoot_cooldown = 20
+        if (
+            keys[pygame.K_f]
+            and self.has_weapon
+            and self.shoot_cooldown == 0
+            and self.ammo > 0
+            and not self.reloading
+        ):
+            bullet = pygame.Rect(self.rect.centerx, self.rect.centery, 15, 5)
+            self.bullets.append(bullet)
+            self.shoot_cooldown = 20
+            self.ammo -= 1
+        if keys[pygame.K_r] and self.ammo < self.max_ammo and not self.reloading:
+            self.reloading = True
+            self.reload_timer = 120
 
     def apply_gravity(self):
         self.vel_y += self.gravity
@@ -59,11 +77,26 @@ class Player:
 
         # Collision obstacles dangereux
         for obstacle in obstacles:
+            def update(self):
+                self.player.update(self.ground, self.platforms, self.obstacles)
+
+        for enemy in self.enemies:
+            enemy.update()
+
+        # Collision joueur / ennemi
+        for enemy in self.enemies:
             if self.rect.colliderect(obstacle) and not self.invincible:
                 self.lives -= 1
-                self.rect.topleft = (100, 470)  # respawn
+                self.rect.topleft = (180, 190)
                 self.invincible = True
                 self.invincible_timer = 60
+        for bullet in self.player.bullets[:]:
+            for enemy in self.enemies[:]:
+                if bullet.colliderect(enemy.rect):
+                    self.player.bullets.remove(bullet)
+                    self.enemies.remove(enemy)
+                    self.player.score += 50
+                    break
 
         # Déplacement horizontal
         self.rect.x += self.vel_x
@@ -101,9 +134,15 @@ class Player:
             self.invincible_timer -= 1
             if self.invincible_timer <= 0:
                 self.invincible = False
+        if self.reloading:
+            self.reload_timer -= 1
+        if self.reload_timer <= 0:
+            self.ammo = self.max_ammo
+            self.reloading = False
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
         
         for bullet in self.bullets:
             pygame.draw.rect(screen, (255, 255, 0), bullet)
+        
