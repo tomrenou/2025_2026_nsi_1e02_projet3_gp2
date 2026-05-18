@@ -33,7 +33,7 @@ class Player:
         self.vel_y += self.gravity
 
     def move_and_collide(self, ground, platforms, obstacles):
-        all_solids = [ground] + platforms
+        all_solids = [ground] + platforms + obstacles
 
         # Déplacement horizontal
         self.rect.x += self.vel_x
