@@ -40,10 +40,10 @@ for theme_name in themes:
     y += 100
 back_button = pygame.Rect((WIDTH - button_width)//2, 500, button_width, button_height)
 
-# ➕ AJOUT : Bouton choisir personnage
+# Bouton choisir personnage
 character_button = pygame.Rect((WIDTH - button_width)//2, 350, button_width, button_height)
 
-# ➕ AJOUT : Bouton plein écran
+# Bouton plein écran
 fullscreen_button = pygame.Rect((WIDTH - button_width)//2, 450, button_width, button_height)
 back_button = pygame.Rect((WIDTH - button_width)//2, 500, button_width, button_height)
 
@@ -53,7 +53,7 @@ menu = True
 in_settings = False
 level = None
 
-# ➕ AJOUT : Variables
+# Variables
 fullscreen = False
 selected_character = None  # pour plus tard
 
@@ -89,10 +89,10 @@ while running:
                     if rect.collidepoint(event.pos):
                         current_theme = themes[theme_name]
                         print(f"Thème changé : {theme_name}")
-                        # ➕ AJOUT : Choisir personnage
+                        # Choisir personnage
                 if character_button.collidepoint(event.pos):
                     print("Menu choix du personnage (à venir)")
-                # ➕ AJOUT : Plein écran
+                # Plein écran
                 if fullscreen_button.collidepoint(event.pos):
                     fullscreen = not fullscreen
                     if fullscreen:
@@ -124,11 +124,11 @@ while running:
         for rect, theme_name in theme_buttons:
             draw_button(rect, theme_name, mouse_pos,
                         current_theme["btn_base"], current_theme["btn_hover"])
-        # ➕ AJOUT : Bouton personnage
+        # Bouton personnage
         draw_button(character_button, "Personnage", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
 
-        # ➕ AJOUT : Bouton plein écran
+        # Bouton plein écran
         draw_button(fullscreen_button,
                     "Plein écran" if not fullscreen else "Fenêtré",
                     mouse_pos,
