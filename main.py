@@ -24,6 +24,14 @@ current_theme = themes["Bleu"]
 title_font = pygame.font.SysFont("comicsansms", 80, bold=True)
 button_font = pygame.font.SysFont("comicsansms", 40, bold=True)
 
+# Couleurs personnages
+character_colors = {
+    "Lior": (255, 255, 255),          # blanc
+    "Lior de glace": (100, 200, 255), # bleu glacé
+    "Lior ténébreux": (80, 0, 120),# violet sombre
+    "Lior de feu": (255, 80, 0)       # orange feu
+}
+
 # Boutons du menu
 button_width, button_height = 300, 70
 play_button = pygame.Rect((WIDTH - button_width)//2, 250, button_width, button_height)
@@ -136,7 +144,6 @@ while running:
                     if rect.collidepoint(event.pos):
                         selected_character = name
                         print("Personnage choisi :", name)
-
                 if back_button.collidepoint(event.pos):
                     in_character_menu = False
                     in_settings = True
@@ -192,12 +199,13 @@ while running:
                         current_theme["btn_base"], current_theme["btn_hover"])
 
         # Aperçu à droite
-        pygame.draw.rect(screen, WHITE, preview_rect, 3)
+        pygame.draw.rect(screen, character_colors[selected_character], preview_rect, 5)
+
 
         preview_label = button_font.render(selected_character, True, WHITE)
         screen.blit(preview_label, (preview_rect.x + 20, preview_rect.y + 20))
 
-        # Ici tu mettras plus tard l’image du perso choisi
+        # plus tard l’image du perso choisi
 
         draw_button(back_button, "Retour", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
