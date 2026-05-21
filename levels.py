@@ -14,7 +14,7 @@ class Level1:
         self.heart = pygame.transform.scale(self.heart, (40, 40))
 
         self.coins = [
-            pygame.Rect(200, 420, 20, 20),
+            pygame.Rect(150, 420, 20, 20),
             pygame.Rect(500, 320, 20, 20),
             pygame.Rect(180, 220, 20, 20)
         ]
@@ -33,7 +33,7 @@ class Level1:
 
         # Obstacles
         self.obstacles = [
-            pygame.Rect(350, 520, 40, 30),
+            pygame.Rect(430, 520, 40, 30),
             pygame.Rect(600, 520, 40, 30),
             pygame.Rect(250, 430, 30, 20)
         ]
