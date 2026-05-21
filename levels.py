@@ -20,7 +20,7 @@ class Level1:
         ]
 
         self.weapon = pygame.Rect(700, 500, 30, 30)
-
+        self.shoot_cooldown = 0
         # Sol
         self.ground = pygame.Rect(0, 550, 800, 50)
 
@@ -91,6 +91,8 @@ class Level1:
         if self.weapon and self.player.rect.colliderect(self.weapon):
             self.player.has_weapon = True
             self.weapon = None
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
 
     def draw(self):
         pygame.draw.rect(self.screen, GREEN, self.ground)

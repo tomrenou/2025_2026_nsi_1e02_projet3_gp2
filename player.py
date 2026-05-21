@@ -47,13 +47,17 @@ class Player:
         if (keys[pygame.K_SPACE] or keys[pygame.K_UP] or keys[pygame.K_z]) and self.on_ground:
             self.vel_y = self.jump_force
             self.on_ground = False
-        if keys[pygame.K_f] and self.has_weapon:
-            bullet = pygame.Rect(self.rect.centerx, self.rect.centery, 15, 5)
-            self.bullets.append(bullet)
-        if keys[pygame.K_f] and self.has_weapon and self.shoot_cooldown == 0:
+        if (
+            keys[pygame.K_f]
+            and self.has_weapon
+            and self.shoot_cooldown == 0
+            and self.ammo > 0
+            and not self.reloading
+        ):
             bullet = pygame.Rect(self.rect.centerx, self.rect.centery, 15, 5)
             self.bullets.append(bullet)
             self.shoot_cooldown = 20
+            self.ammo -= 1
         if (
             keys[pygame.K_f]
             and self.has_weapon
