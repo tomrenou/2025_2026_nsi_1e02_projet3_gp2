@@ -21,9 +21,11 @@ class Level1:
 
     def __init__(self, screen, image_path="Liorbleu.png"):
 
+        self.last_kill_count = 0
         self.game_timer = 0
+        self.next_bonus_life = 1000  # prochain score pour gagner une vie
         self.screen = screen
-        self.image_path = image_path  # pour le reset
+        self.image_path = image_path
 
         # Fond
         self.background_color = SKY
@@ -54,7 +56,7 @@ class Level1:
 
         # Pièces
         self.coins = [pygame.Rect(c.x, c.y, c.w, c.h) for c in COINS_INITIAL]
-        self.coin_respawn_timer = 0  # timer réapparition pièces
+        self.coin_respawn_timer = 0
 
         # Arme
         self.weapon = pygame.Rect(700, 495, 32, 32)
@@ -74,6 +76,7 @@ class Level1:
         self.__init__(self.screen, self.image_path)
 
     def update(self):
+        self.game_timer += 1
 
         # Game Over : touches R et Echap
         if self.state == "GAME_OVER":
@@ -88,8 +91,9 @@ class Level1:
 
         self.player.update(self.ground, self.platforms, self.obstacles)
 
+        # Ennemis — on passe le joueur pour la poursuite
         for enemy in self.enemies:
-            enemy.update()
+            enemy.update(self.player)
 
         if self.state != "PLAY":
             return
@@ -104,6 +108,8 @@ class Level1:
                 self.player.rect.topleft = (180, 190)
                 self.player.invincible = True
                 self.player.invincible_timer = 60
+                enemy.on_hit_player()
+                self.last_kill_count = enemy.kill_count
 
         # Balles / ennemis
         for bullet in self.player.bullets[:]:
@@ -116,17 +122,22 @@ class Level1:
                     self.player.score += 50
                     break
 
-        # Respawn ennemis
+        # Respawn ennemis avec mémoire agressivité - 1
         if len(self.enemies) == 0:
             if self.enemy_respawn_timer == 0:
                 self.enemy_respawn_timer = 300
             else:
                 self.enemy_respawn_timer -= 1
                 if self.enemy_respawn_timer <= 0:
-                    self.enemies = [
-                        Enemy(0, 490, 0, 300),
-                        Enemy(500, 490, 500, 750)
-                    ]
+                    e1 = Enemy(0, 490, 0, 300)
+                    e2 = Enemy(500, 490, 500, 750)
+                    prev = max(0, self.last_kill_count - 1)
+                    for e in [e1, e2]:
+                        if prev > 0:
+                            e.aggressive = True
+                            e.kill_count = prev
+                            e.chase_speed = min(1.5 + prev * 0.5, 5)
+                    self.enemies = [e1, e2]
                     self.enemy_respawn_timer = 0
 
         # Pièces
@@ -135,7 +146,7 @@ class Level1:
                 self.coins.remove(coin)
                 self.player.score += 10
 
-        # Réapparition pièces après 10 secondes (600 frames)
+        # Réapparition pièces après 10 secondes
         if len(self.coins) == 0:
             if self.coin_respawn_timer == 0:
                 self.coin_respawn_timer = 600
@@ -149,6 +160,12 @@ class Level1:
         if self.weapon and self.player.rect.colliderect(self.weapon):
             self.player.has_weapon = True
             self.weapon = None
+
+        # Vie bonus tous les 1000 points (max 5 vies)
+        if self.player.score >= self.next_bonus_life:
+            if self.player.lives < 5:
+                self.player.lives += 1
+            self.next_bonus_life += 1000
 
         # Game over
         if self.player.lives <= 0:
@@ -167,7 +184,6 @@ class Level1:
         pygame.draw.circle(self.screen, WHITE, (130, 90), 30)
         pygame.draw.circle(self.screen, WHITE, (165, 90), 40)
         pygame.draw.circle(self.screen, WHITE, (205, 90), 30)
-
         pygame.draw.circle(self.screen, WHITE, (500, 140), 25)
         pygame.draw.circle(self.screen, WHITE, (530, 140), 35)
         pygame.draw.circle(self.screen, WHITE, (565, 140), 25)
@@ -233,16 +249,8 @@ class Level1:
         total_seconds = self.game_timer // 60
         minutes = total_seconds // 60
         seconds = total_seconds % 60
-
-        if self.game_timer >= 7200:
-            timer_color = (255, 60, 60)
-            if 7200 <= self.game_timer <= 7260 and (self.game_timer % 20) < 10:
-                timer_color = (255, 215, 0)
-        else:
-            timer_color = WHITE
-
         font_timer = pygame.font.SysFont("arialblack", 28)
-        timer_text = font_timer.render(f"{minutes:02d}:{seconds:02d}", True, timer_color)
+        timer_text = font_timer.render(f"{minutes:02d}:{seconds:02d}", True, WHITE)
         self.screen.blit(timer_text, (370, 10))
 
         # HUD munitions
@@ -250,7 +258,6 @@ class Level1:
 
         # GAME OVER
         if self.state == "GAME_OVER":
-            self.game_timer += 1
             overlay = pygame.Surface((800, 600))
             overlay.set_alpha(170)
             overlay.fill((0, 0, 0))
