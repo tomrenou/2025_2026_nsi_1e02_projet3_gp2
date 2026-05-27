@@ -16,14 +16,15 @@ COINS_INITIAL = [
 ]
 
 class Level1:
-    def __init__(self, screen):
+    def __init__(self, screen, image_path="Liorbleu.png"):  # ← image_path ajouté
         self.screen = screen
+        self.image_path = image_path  # ← on le garde pour le reset
         self.heart = pygame.image.load("heart.png").convert_alpha()
         self.heart = pygame.transform.scale(self.heart, (40, 40))
 
         # Pièces
         self.coins = [pygame.Rect(c.x, c.y, c.w, c.h) for c in COINS_INITIAL]
-        self.coin_respawn_timer = 0  # Timer réapparition pièces (en frames)
+        self.coin_respawn_timer = 0
 
         # Arme
         self.weapon = pygame.Rect(700, 500, 30, 30)
@@ -46,8 +47,8 @@ class Level1:
             pygame.Rect(250, 430, 30, 20)
         ]
 
-        # Joueur
-        self.player = Player(180, 190)
+        # Joueur — on passe l'image du personnage choisi
+        self.player = Player(180, 190, image_path=image_path)
 
         # Ennemis
         self.enemies = [
@@ -60,12 +61,10 @@ class Level1:
         self.state = "PLAY"
 
     def reset(self):
-        """Remet le niveau à zéro."""
-        self.__init__(self.screen)
+        self.__init__(self.screen, self.image_path)
 
     def update(self):
 
-        # Touches clavier (Restart / Quitter sur Game Over)
         if self.state == "GAME_OVER":
             keys = pygame.key.get_pressed()
             if keys[pygame.K_r]:
@@ -117,7 +116,7 @@ class Level1:
                 self.coins.remove(coin)
                 self.player.score += 10
 
-        # Réapparition pièces après 10 secondes (600 frames à 60fps)
+        # Réapparition pièces après 10 secondes
         if len(self.coins) == 0:
             if self.coin_respawn_timer == 0:
                 self.coin_respawn_timer = 600
@@ -141,42 +140,33 @@ class Level1:
 
     def draw(self):
 
-        # Sol et plateformes
         pygame.draw.rect(self.screen, GREEN, self.ground)
         for p in self.platforms:
             pygame.draw.rect(self.screen, GREY, p)
 
-        # Obstacles
         for o in self.obstacles:
             pygame.draw.rect(self.screen, RED, o)
 
-        # Pièces
         for coin in self.coins:
             pygame.draw.circle(self.screen, YELLOW, coin.center, 10)
 
-        # Compte à rebours réapparition pièces
         if len(self.coins) == 0 and self.coin_respawn_timer > 0:
             font = pygame.font.SysFont(None, 28)
             secs = self.coin_respawn_timer // 60 + 1
             txt = font.render(f"Pièces dans {secs}s", True, YELLOW)
             self.screen.blit(txt, (340, 10))
 
-        # Arme
         if self.weapon:
             pygame.draw.rect(self.screen, (0, 0, 255), self.weapon)
 
-        # Ennemis
         for enemy in self.enemies:
             enemy.draw(self.screen)
 
-        # Joueur
         self.player.draw(self.screen)
 
-        # HUD — vies
         for i in range(self.player.lives):
             self.screen.blit(self.heart, (10 + i * 45, 10))
 
-        # HUD — score et arme
         font = pygame.font.SysFont(None, 35)
         score_text = font.render(f"Score: {self.player.score}", True, WHITE)
         self.screen.blit(score_text, (650, 10))
@@ -187,10 +177,8 @@ class Level1:
         )
         self.screen.blit(weapon_text, (620, 45))
 
-        # HUD — munitions
         self.player.draw_hud(self.screen)
 
-        # Écran Game Over
         if self.state == "GAME_OVER":
             overlay = pygame.Surface((800, 600), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 160))
