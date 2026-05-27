@@ -46,8 +46,8 @@ class Player:
 
         self.shoot_cooldown = 0
 
-        self.ammo = 6
-        self.max_ammo = 6
+        self.ammo = 9
+        self.max_ammo = 9
 
         self.reloading = False
         self.reload_timer = 0
@@ -268,7 +268,7 @@ class Player:
             text = "Reload..."
             color = (255, 170, 0)
         else:
-            text = f"Ammo : {self.ammo}/{self.max_ammo}"
+            text = f"Muni : {self.ammo}/{self.max_ammo}"
             color = (255, 255, 0)
             ammo_text = font.render(text, True, color)
 

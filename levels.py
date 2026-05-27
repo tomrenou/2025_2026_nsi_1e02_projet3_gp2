@@ -31,7 +31,7 @@ class Level1:
         # Plateformes
         self.platforms = [
             pygame.Rect(90, 430, 190, 22),
-            pygame.Rect(390, 340, 240, 22),
+            pygame.Rect(330, 340, 240, 22),
             pygame.Rect(140, 240, 180, 22)
         ]
 
