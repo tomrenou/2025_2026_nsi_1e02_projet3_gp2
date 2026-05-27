@@ -383,7 +383,7 @@ while running:
             current_theme["btn_hover"],
             font=small_back_font
         )
-
+    
     # JEU
     else:
 

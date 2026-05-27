@@ -148,6 +148,21 @@ class Level1:
             self.game_over = True
             self.state = "GAME_OVER"
 
+    def handle_events(self, event):
+        if self.state == "GAME_OVER":
+
+            if event.type == pygame.KEYDOWN:
+
+            # Quitter
+                if event.key == pygame.K_q:
+                   pygame.quit()
+                exit()
+
+            # Restart
+            if event.key == pygame.K_r:
+                self.__init__(self.screen, self.player.image_path if hasattr(self.player, "image_path") else "Liorbleu.png")
+                self.state = "PLAY"
+                self.game_over = False
     def draw(self):
 
         # Fond ciel
