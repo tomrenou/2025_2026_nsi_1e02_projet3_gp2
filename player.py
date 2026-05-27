@@ -134,4 +134,22 @@ class Player:
         
         for bullet in self.bullets:
             pygame.draw.rect(screen, (255, 255, 0), bullet)
+
+    def draw_hud(self, screen):
+        font = pygame.font.SysFont(None, 30)
+
+    # Vies
+        lives_text = font.render(f"Vies : {self.lives}", True, WHITE)
+        screen.blit(lives_text, (10, 10))
+
+    # Score
+        score_text = font.render(f"Score : {self.score}", True, WHITE)
+        screen.blit(score_text, (10, 40))
+
+    # Munitions / rechargement
+        if self.reloading:
+            ammo_text = font.render("Rechargement...", True, (255, 165, 0))
+        else:
+            ammo_text = font.render(f"Munitions : {self.ammo}/{self.max_ammo}", True, WHITE)
+        screen.blit(ammo_text, (10, 70))
         
