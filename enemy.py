@@ -7,7 +7,7 @@ class Enemy:
 
         self.rect = self.image.get_rect(topleft=(x, y))
 
-        self.speed = 3
+        self.speed = 2
         self.direction = 1  # 1 = droite, -1 = gauche
 
         # Limites de patrouille
