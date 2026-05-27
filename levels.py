@@ -39,7 +39,7 @@ class Level1:
         self.obstacles = [
             pygame.Rect(430, 510, 40, 30),
             pygame.Rect(600, 510, 40, 30),
-            pygame.Rect(250, 400, 30, 30)
+            pygame.Rect(200, 400, 30, 30)
         ]
 
         # Pièces
