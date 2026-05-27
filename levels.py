@@ -98,7 +98,7 @@ class Level1:
 
             for enemy in self.enemies[:]:
 
-                if bullet.colliderect(enemy.rect):
+                if bullet["rect"].colliderect(enemy.rect):
 
                     if bullet in self.player.bullets:
                         self.player.bullets.remove(bullet)

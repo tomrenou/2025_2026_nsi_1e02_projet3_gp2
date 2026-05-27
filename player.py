@@ -3,11 +3,24 @@ import pygame
 WHITE = (255, 255, 255)
 
 class Player:
+
     def __init__(self, x, y, image_path="Liorbleu.png"):
 
-        # Image joueur
-        self.image = pygame.image.load(image_path).convert_alpha()
-        self.image = pygame.transform.scale(self.image, (70, 60))
+        # Images joueur
+        self.image_right = pygame.image.load(image_path).convert_alpha()
+        self.image_right = pygame.transform.scale(self.image_right, (70, 60))
+
+        self.image_left = pygame.transform.flip(
+            self.image_right,
+            True,
+            False
+        )
+
+        # Image actuelle
+        self.image = self.image_right
+
+        # Direction
+        self.direction = "right"
 
         # Hitbox
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -15,9 +28,11 @@ class Player:
         # Mouvement
         self.vel_x = 0
         self.vel_y = 0
+
         self.speed = 2
         self.jump_force = -14
         self.gravity = 0.8
+
         self.on_ground = False
 
         # Stats
@@ -26,30 +41,42 @@ class Player:
 
         # Arme
         self.has_weapon = False
+
         self.bullets = []
 
         self.shoot_cooldown = 0
+
         self.ammo = 6
         self.max_ammo = 6
 
         self.reloading = False
         self.reload_timer = 0
 
-        # Invincibilité temporaire
+        # Invincibilité
         self.invincible = False
         self.invincible_timer = 0
 
     def handle_input(self):
 
         keys = pygame.key.get_pressed()
+
         self.vel_x = 0
 
-        # Déplacements
+        # Gauche
         if keys[pygame.K_LEFT] or keys[pygame.K_q]:
+
             self.vel_x = -self.speed
 
+            self.direction = "left"
+            self.image = self.image_left
+
+        # Droite
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+
             self.vel_x = self.speed
+
+            self.direction = "right"
+            self.image = self.image_right
 
         # Saut
         if (
@@ -70,12 +97,16 @@ class Player:
             and not self.reloading
         ):
 
-            bullet = pygame.Rect(
-                self.rect.centerx,
-                self.rect.centery,
-                15,
-                5
-            )
+            bullet = {
+                "rect": pygame.Rect(
+                    self.rect.centerx,
+                    self.rect.centery,
+                    15,
+                    5
+                ),
+
+                "direction": self.direction
+            }
 
             self.bullets.append(bullet)
 
@@ -93,6 +124,7 @@ class Player:
             self.reload_timer = 120
 
     def apply_gravity(self):
+
         self.vel_y += self.gravity
 
     def move_and_collide(self, ground, platforms, obstacles):
@@ -156,13 +188,19 @@ class Player:
             obstacles
         )
 
-        # Bullets
+        # Déplacement balles
         for bullet in self.bullets:
-            bullet.x += 10
 
+            if bullet["direction"] == "right":
+                bullet["rect"].x += 10
+
+            elif bullet["direction"] == "left":
+                bullet["rect"].x -= 10
+
+        # Supprimer balles hors écran
         self.bullets = [
             bullet for bullet in self.bullets
-            if bullet.x < 800
+            if -50 < bullet["rect"].x < 850
         ]
 
         # Cooldown tir
@@ -177,7 +215,7 @@ class Player:
             if self.invincible_timer <= 0:
                 self.invincible = False
 
-        # Reload
+        # Rechargement
         if self.reloading:
 
             self.reload_timer -= 1
@@ -189,32 +227,25 @@ class Player:
 
     def draw(self, screen):
 
-        screen.blit(self.image, self.rect)
+        # Effet clignotement invincible
+        if self.invincible and self.invincible_timer % 10 < 5:
+            pass
+        else:
+            screen.blit(self.image, self.rect)
 
+        # Balles
         for bullet in self.bullets:
-            pygame.draw.rect(screen, (255, 255, 0), bullet)
+
+            pygame.draw.rect(
+                screen,
+                (255, 255, 0),
+                bullet["rect"],
+                border_radius=3
+            )
 
     def draw_hud(self, screen):
 
         font = pygame.font.SysFont(None, 30)
-
-        # Vies
-        lives_text = font.render(
-            f"Vies : {self.lives}",
-            True,
-            WHITE
-        )
-
-        screen.blit(lives_text, (10, 10))
-
-        # Score
-        score_text = font.render(
-            f"Score : {self.score}",
-            True,
-            WHITE
-        )
-
-        screen.blit(score_text, (10, 40))
 
         # Munitions
         if self.reloading:
@@ -228,9 +259,9 @@ class Player:
         else:
 
             ammo_text = font.render(
-                f"Munitions : {self.ammo}/{self.max_ammo}",
+                f"{self.ammo}/{self.max_ammo}",
                 True,
                 WHITE
             )
 
-        screen.blit(ammo_text, (10, 70))
+        screen.blit(ammo_text, (10, 55))
