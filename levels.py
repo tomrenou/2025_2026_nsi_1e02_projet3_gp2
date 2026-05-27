@@ -273,7 +273,8 @@ class Level1:
         )
 
         self.screen.blit(score_text, (730, 10))
-
+        # HUD munitions
+        self.player.draw_hud(self.screen)
         # GAME OVER
         if self.state == "GAME_OVER":
 

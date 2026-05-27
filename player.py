@@ -245,23 +245,31 @@ class Player:
 
     def draw_hud(self, screen):
 
-        font = pygame.font.SysFont(None, 30)
+        font = pygame.font.SysFont("arialblack", 24)
 
-        # Munitions
+    # rectangle HUD (placé sous les cœurs)
+        pygame.draw.rect(
+        screen,
+        (20, 20, 20),
+        (10, 55, 180, 40),
+        border_radius=10
+    )
+
+        pygame.draw.rect(
+        screen,
+        (255, 255, 255),
+        (10, 55, 180, 40),
+        2,
+        border_radius=10
+    )
+
+    # texte munitions
         if self.reloading:
-
-            ammo_text = font.render(
-                "Rechargement...",
-                True,
-                (255, 165, 0)
-            )
-
+            text = "Reload..."
+            color = (255, 170, 0)
         else:
+            text = f"Ammo : {self.ammo}/{self.max_ammo}"
+            color = (255, 255, 0)
+            ammo_text = font.render(text, True, color)
 
-            ammo_text = font.render(
-                f"{self.ammo}/{self.max_ammo}",
-                True,
-                WHITE
-            )
-
-        screen.blit(ammo_text, (10, 55))
+            screen.blit(ammo_text, (20, 62))
