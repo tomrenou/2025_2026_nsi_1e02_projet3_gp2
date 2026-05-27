@@ -14,12 +14,14 @@ class Level1:
         self.heart = pygame.transform.scale(self.heart, (40, 40))
 
         self.coins = [
-            pygame.Rect(200, 420, 20, 20),
+            pygame.Rect(150, 420, 20, 20),
             pygame.Rect(500, 320, 20, 20),
             pygame.Rect(180, 220, 20, 20)
         ]
-
+        
+        # armes
         self.weapon = pygame.Rect(700, 500, 30, 30)
+        self.shoot_cooldown = 0
 
         # Sol
         self.ground = pygame.Rect(0, 550, 800, 50)
@@ -33,7 +35,7 @@ class Level1:
 
         # Obstacles
         self.obstacles = [
-            pygame.Rect(350, 520, 40, 30),
+            pygame.Rect(430, 520, 40, 30),
             pygame.Rect(600, 520, 40, 30),
             pygame.Rect(250, 430, 30, 20)
         ]
@@ -48,12 +50,19 @@ class Level1:
         ]
         self.enemy_respawn_timer = 0
 
+        # Game over
+        self.game_over = False
+        self.state = "PLAY"
+
     def update(self):
         self.player.update(self.ground, self.platforms, self.obstacles)
-
+        
+        # game over
         for enemy in self.enemies:
             enemy.update()
-
+        if self.state != "PLAY":
+            return
+        
         # Collision joueur / ennemi
         for enemy in self.enemies:
             if self.player.rect.colliderect(enemy.rect) and not self.player.invincible:
@@ -91,6 +100,16 @@ class Level1:
         if self.weapon and self.player.rect.colliderect(self.weapon):
             self.player.has_weapon = True
             self.weapon = None
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
+
+        # game over
+        if self.game_over:
+            return
+        if self.player.lives <= 0:
+            self.game_over = True
+        if self.player.lives <= 0:
+            self.state = "GAME_OVER"
 
     def draw(self):
         pygame.draw.rect(self.screen, GREEN, self.ground)
@@ -128,5 +147,23 @@ class Level1:
             WHITE
         )
         self.screen.blit(weapon_text, (620, 45))
-        
 
+        # game over
+        if self.game_over:
+            font = pygame.font.SysFont(None, 80)
+            text = font.render("GAME OVER", True, (255, 0, 0))
+            self.screen.blit(text, (250, 250))
+            return
+        if self.state == "GAME_OVER":
+            font = pygame.font.SysFont(None, 60)
+
+            title = font.render("GAME OVER", True, (255, 0, 0))
+            restart = font.render("R - Restart", True, (255, 255, 255))
+            menu = font.render("M - Menu", True, (255, 255, 255))
+            quit_text = font.render("Q - Quitter", True, (255, 255, 255))
+
+            self.screen.blit(title, (260, 150))
+            self.screen.blit(restart, (280, 300))
+            self.screen.blit(menu, (300, 360))
+            self.screen.blit(quit_text, (280, 420))
+            return
