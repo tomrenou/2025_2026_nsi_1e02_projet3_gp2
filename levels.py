@@ -1,6 +1,6 @@
 import pygame
 from player import Player
-from enemy import Enemy   # ← AJOUT
+from enemy import Enemy
 
 WHITE = (255, 255, 255)
 GREY = (120, 120, 120)
@@ -18,8 +18,8 @@ class Level1:
             pygame.Rect(500, 320, 20, 20),
             pygame.Rect(180, 220, 20, 20)
         ]
-        
-        # armes
+
+        # Arme
         self.weapon = pygame.Rect(700, 500, 30, 30)
         self.shoot_cooldown = 0
 
@@ -43,26 +43,26 @@ class Level1:
         # Joueur
         self.player = Player(180, 190)
 
-        # ENNEMIS (nouveau)
+        # Ennemis
         self.enemies = [
-            Enemy(0, 490, 0, 300),        # Ennemi qui patrouille à gauche
-            Enemy(500, 490, 500, 750)     # Ennemi qui patrouille à droite
+            Enemy(0, 490, 0, 300),
+            Enemy(500, 490, 500, 750)
         ]
         self.enemy_respawn_timer = 0
 
-        # Game over
+        # État du jeu
         self.game_over = False
         self.state = "PLAY"
 
     def update(self):
         self.player.update(self.ground, self.platforms, self.obstacles)
-        
-        # game over
+
         for enemy in self.enemies:
             enemy.update()
+
         if self.state != "PLAY":
             return
-        
+
         # Collision joueur / ennemi
         for enemy in self.enemies:
             if self.player.rect.colliderect(enemy.rect) and not self.player.invincible:
@@ -70,6 +70,8 @@ class Level1:
                 self.player.rect.topleft = (180, 190)
                 self.player.invincible = True
                 self.player.invincible_timer = 60
+
+        # Collision balles / ennemis
         for bullet in self.player.bullets[:]:
             for enemy in self.enemies[:]:
                 if bullet.colliderect(enemy.rect):
@@ -77,12 +79,13 @@ class Level1:
                     self.enemies.remove(enemy)
                     self.player.score += 50
                     break
+
+        # Respawn ennemis
         if len(self.enemies) == 0:
             if self.enemy_respawn_timer == 0:
                 self.enemy_respawn_timer = 300
             else:
                 self.enemy_respawn_timer -= 1
-
                 if self.enemy_respawn_timer <= 0:
                     self.enemies = [
                         Enemy(0, 490, 0, 300),
@@ -90,36 +93,32 @@ class Level1:
                     ]
                     self.enemy_respawn_timer = 0
 
-        # ramassage pièces
+        # Ramassage pièces
         for coin in self.coins[:]:
             if self.player.rect.colliderect(coin):
                 self.coins.remove(coin)
                 self.player.score += 10
 
-        # ramassage arme
+        # Ramassage arme
         if self.weapon and self.player.rect.colliderect(self.weapon):
             self.player.has_weapon = True
             self.weapon = None
+
         if self.shoot_cooldown > 0:
             self.shoot_cooldown -= 1
 
-        # game over
-        if self.game_over:
-            return
+        # Game over
         if self.player.lives <= 0:
             self.game_over = True
-        if self.player.lives <= 0:
             self.state = "GAME_OVER"
 
     def draw(self):
+        # Sol et plateformes
         pygame.draw.rect(self.screen, GREEN, self.ground)
-
-        for i in range(self.player.lives):
-            self.screen.blit(self.heart, (10 + i * 45, 10))
-
         for p in self.platforms:
             pygame.draw.rect(self.screen, GREY, p)
 
+        # Obstacles
         for o in self.obstacles:
             pygame.draw.rect(self.screen, RED, o)
 
@@ -131,39 +130,40 @@ class Level1:
         if self.weapon:
             pygame.draw.rect(self.screen, (0, 0, 255), self.weapon)
 
+        # Ennemis
         for enemy in self.enemies:
             enemy.draw(self.screen)
 
+        # Joueur
         self.player.draw(self.screen)
 
-        font = pygame.font.SysFont(None, 35)
+        # HUD — vies
+        for i in range(self.player.lives):
+            self.screen.blit(self.heart, (10 + i * 45, 10))
 
+        # HUD — score et arme
+        font = pygame.font.SysFont(None, 35)
         score_text = font.render(f"Score: {self.player.score}", True, WHITE)
         self.screen.blit(score_text, (650, 10))
 
         weapon_text = font.render(
             f"Arme: {'Oui' if self.player.has_weapon else 'Non'}",
-            True,
-            WHITE
+            True, WHITE
         )
         self.screen.blit(weapon_text, (620, 45))
 
-        # game over
-        if self.game_over:
-            font = pygame.font.SysFont(None, 80)
-            text = font.render("GAME OVER", True, (255, 0, 0))
-            self.screen.blit(text, (250, 250))
-            return
+        # HUD — munitions (en bas à gauche)
+        self.player.draw_hud(self.screen)
+
+        # Game over
         if self.state == "GAME_OVER":
-            font = pygame.font.SysFont(None, 60)
-
-            title = font.render("GAME OVER", True, (255, 0, 0))
-            restart = font.render("R - Restart", True, (255, 255, 255))
-            menu = font.render("M - Menu", True, (255, 255, 255))
-            quit_text = font.render("Q - Quitter", True, (255, 255, 255))
-
-            self.screen.blit(title, (260, 150))
+            font_big = pygame.font.SysFont(None, 80)
+            font_med = pygame.font.SysFont(None, 60)
+            title = font_big.render("GAME OVER", True, (255, 0, 0))
+            restart = font_med.render("R - Restart", True, WHITE)
+            menu = font_med.render("M - Menu", True, WHITE)
+            quit_text = font_med.render("Q - Quitter", True, WHITE)
+            self.screen.blit(title, (200, 150))
             self.screen.blit(restart, (280, 300))
             self.screen.blit(menu, (300, 360))
             self.screen.blit(quit_text, (280, 420))
-            return
