@@ -21,6 +21,7 @@ class Level1:
 
     def __init__(self, screen, image_path="Liorbleu.png"):
 
+        self.game_timer = 0
         self.screen = screen
         self.image_path = image_path  # pour le reset
 
@@ -228,11 +229,28 @@ class Level1:
         score_text = font.render(f"{self.player.score}", True, WHITE)
         self.screen.blit(score_text, (730, 10))
 
+        # --- TIMER ---
+        total_seconds = self.game_timer // 60
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+
+        if self.game_timer >= 7200:
+            timer_color = (255, 60, 60)
+            if 7200 <= self.game_timer <= 7260 and (self.game_timer % 20) < 10:
+                timer_color = (255, 215, 0)
+        else:
+            timer_color = WHITE
+
+        font_timer = pygame.font.SysFont("arialblack", 28)
+        timer_text = font_timer.render(f"{minutes:02d}:{seconds:02d}", True, timer_color)
+        self.screen.blit(timer_text, (370, 10))
+
         # HUD munitions
         self.player.draw_hud(self.screen)
 
         # GAME OVER
         if self.state == "GAME_OVER":
+            self.game_timer += 1
             overlay = pygame.Surface((800, 600))
             overlay.set_alpha(170)
             overlay.fill((0, 0, 0))
