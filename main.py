@@ -52,13 +52,16 @@ for theme_name in themes:
     theme_buttons.append((rect, theme_name))
     y += 100
 
-# Sous-menu personnages (boutons à gauche)
-character_choices = [
-    ("Lior", pygame.Rect(50, 200, 250, 60)),
-    ("Lior de glace", pygame.Rect(50, 280, 250, 60)),
-    ("Lior ténébreux", pygame.Rect(50, 360, 250, 60)),
-    ("Lior de feu", pygame.Rect(50, 440, 250, 60)),
-]
+# Images des personnages
+character_images = {
+    "Lior": pygame.image.load("Lior.png").convert_alpha(),
+    "Lior de glace": pygame.image.load("Lior_glace.png").convert_alpha(),
+    "Lior ténébreux": pygame.image.load("Lior_tenebreux.png").convert_alpha(),
+    "Lior de feu": pygame.image.load("Lior_feu.png").convert_alpha(),
+}
+# Redimensionner toutes les images pour l'aperçu
+for key in character_images:
+    character_images[key] = pygame.transform.scale(character_images[key], (200, 200))
 
 # Rectangle d’aperçu à droite
 preview_rect = pygame.Rect(400, 200, 350, 300)
@@ -140,7 +143,7 @@ while running:
             # SOUS-MENU PERSONNAGES
             elif in_character_menu:
 
-                for name, rect in character_choices:
+                for name, rect in character_images:
                     if rect.collidepoint(event.pos):
                         selected_character = name
                         print("Personnage choisi :", name)
@@ -194,7 +197,7 @@ while running:
         screen.blit(settings_text, ((WIDTH - settings_text.get_width())//2, 50))
 
         # Boutons à gauche
-        for name, rect in character_choices:
+        for name, rect in character_images:
             draw_button(rect, name, mouse_pos,
                         current_theme["btn_base"], current_theme["btn_hover"])
 

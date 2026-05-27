@@ -5,8 +5,8 @@ WHITE = (255, 255, 255)
 class Player:
     def __init__(self, x, y):
         # Image joueur
-        self.image = pygame.image.load("Lior.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (60, 60))
+        self.image = pygame.image.load("Liorbleu.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (70, 60))
         self.shoot_cooldown = 0
         self.ammo = 6
         self.max_ammo = 6
