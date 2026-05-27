@@ -23,26 +23,39 @@ current_theme = themes["Bleu"]
 # Polices
 title_font = pygame.font.SysFont("comicsansms", 80, bold=True)
 button_font = pygame.font.SysFont("comicsansms", 40, bold=True)
+char_font = pygame.font.SysFont("comicsansms", 31, bold=True)   # boutons persos : entre 22 et 40
+small_back_font = pygame.font.SysFont("comicsansms", 28, bold=True)  # retour onglet persos
 
 # Couleurs personnages
 character_colors = {
-    "Lior": (255, 255, 255),          # blanc
-    "Lior de glace": (100, 200, 255), # bleu glacé
-    "Lior ténébreux": (80, 0, 120),# violet sombre
-    "Lior de feu": (255, 80, 0)       # orange feu
+    "Lior": (255, 255, 255),
+    "Lior de glace": (100, 200, 255),
+    "Lior ténébreux": (80, 0, 120),
+    "Lior de feu": (255, 80, 0)
 }
 
-# Boutons du menu
+# Images des personnages
+character_images = {
+    "Lior": pygame.transform.scale(pygame.image.load("Liorbleu.png").convert_alpha(), (230, 200)),
+    "Lior de glace": pygame.transform.scale(pygame.image.load("Lior_glace.png").convert_alpha(), (230, 200)),
+    "Lior ténébreux": pygame.transform.scale(pygame.image.load("Lior_tenebreux.png").convert_alpha(), (230, 200)),
+    "Lior de feu": pygame.transform.scale(pygame.image.load("Lior_feu.png").convert_alpha(), (230, 200)),
+}
+
+# Boutons du menu principal
 button_width, button_height = 300, 70
 play_button = pygame.Rect((WIDTH - button_width)//2, 250, button_width, button_height)
 settings_button = pygame.Rect((WIDTH - button_width)//2, 350, button_width, button_height)
-quit_button = pygame.Rect((WIDTH - button_width)//2, 450, button_width, button_height)
+quit_button = pygame.Rect((WIDTH - button_width)//2, 450, button_width, button_height)  # comme avant
 
 # Boutons paramètres
 colors_button = pygame.Rect((WIDTH - button_width)//2, 200, button_width, button_height)
 character_button = pygame.Rect((WIDTH - button_width)//2, 300, button_width, button_height)
 fullscreen_button = pygame.Rect((WIDTH - button_width)//2, 400, button_width, button_height)
 back_button = pygame.Rect((WIDTH - button_width)//2, 500, button_width, button_height)
+
+# Bouton retour UNIQUEMENT dans l'onglet personnages (plus petit)
+back_button_char = pygame.Rect((WIDTH - 200)//2, 520, 200, 50)
 
 # Sous-menu couleurs
 theme_buttons = []
@@ -52,21 +65,18 @@ for theme_name in themes:
     theme_buttons.append((rect, theme_name))
     y += 100
 
-# Images des personnages
-character_images = {
-    "Lior": pygame.image.load("Lior.png").convert_alpha(),
-    "Lior de glace": pygame.image.load("Lior_glace.png").convert_alpha(),
-    "Lior ténébreux": pygame.image.load("Lior_tenebreux.png").convert_alpha(),
-    "Lior de feu": pygame.image.load("Lior_feu.png").convert_alpha(),
-}
-# Redimensionner toutes les images pour l'aperçu
-for key in character_images:
-    character_images[key] = pygame.transform.scale(character_images[key], (200, 200))
+# Sous-menu personnages
+character_choices = [
+    ("Lior",           pygame.Rect(50, 200, 250, 60)),
+    ("Lior de glace",  pygame.Rect(50, 280, 250, 60)),
+    ("Lior ténébreux", pygame.Rect(50, 360, 250, 60)),
+    ("Lior de feu",    pygame.Rect(50, 440, 250, 60)),
+]
 
-# Rectangle d’aperçu à droite
-preview_rect = pygame.Rect(400, 200, 350, 300)
+# Cadre aperçu élargi
+preview_rect = pygame.Rect(370, 170, 390, 340)
 
-# États du menu
+# États
 running = True
 menu = True
 in_settings = False
@@ -76,16 +86,21 @@ level = None
 
 # Variables
 fullscreen = False
-selected_character = "Lior"  # par défaut
+selected_character = "Lior"
 
-def draw_button(rect, text, mouse_pos, base_color, hover_color):
+def draw_button(rect, text, mouse_pos, base_color, hover_color, font=None):
+    if font is None:
+        font = button_font
     if rect.collidepoint(mouse_pos):
         pygame.draw.rect(screen, hover_color, rect, border_radius=12)
     else:
         pygame.draw.rect(screen, base_color, rect, border_radius=12)
-    label = button_font.render(text, True, WHITE)
+    label = font.render(text, True, WHITE)
     screen.blit(label, (rect.x + (rect.width - label.get_width())//2,
                         rect.y + (rect.height - label.get_height())//2))
+
+def draw_rounded_rect_outline(surface, color, rect, radius, width=3):
+    pygame.draw.rect(surface, color, rect, width=width, border_radius=radius)
 
 while running:
     mouse_pos = pygame.mouse.get_pos()
@@ -109,45 +124,37 @@ while running:
 
             # PARAMÈTRES
             elif in_settings:
-
                 if colors_button.collidepoint(event.pos):
                     in_settings = False
                     in_color_menu = True
-
                 if character_button.collidepoint(event.pos):
                     in_settings = False
                     in_character_menu = True
-
                 if fullscreen_button.collidepoint(event.pos):
                     fullscreen = not fullscreen
                     if fullscreen:
                         screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
                     else:
                         screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
                 if back_button.collidepoint(event.pos):
                     menu = True
                     in_settings = False
 
             # SOUS-MENU COULEURS
             elif in_color_menu:
-
                 for rect, theme_name in theme_buttons:
                     if rect.collidepoint(event.pos):
                         current_theme = themes[theme_name]
-
                 if back_button.collidepoint(event.pos):
                     in_color_menu = False
                     in_settings = True
 
             # SOUS-MENU PERSONNAGES
             elif in_character_menu:
-
-                for name, rect in character_images:
+                for name, rect in character_choices:
                     if rect.collidepoint(event.pos):
                         selected_character = name
-                        print("Personnage choisi :", name)
-                if back_button.collidepoint(event.pos):
+                if back_button_char.collidepoint(event.pos):
                     in_character_menu = False
                     in_settings = True
 
@@ -155,7 +162,6 @@ while running:
     if menu:
         title_text = title_font.render("Lior's Adventures", True, current_theme["title"])
         screen.blit(title_text, ((WIDTH - title_text.get_width())//2, 100))
-
         draw_button(play_button, "Jouer", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
         draw_button(settings_button, "Paramètres", mouse_pos,
@@ -167,15 +173,13 @@ while running:
     elif in_settings:
         settings_text = title_font.render("Paramètres", True, current_theme["title"])
         screen.blit(settings_text, ((WIDTH - settings_text.get_width())//2, 50))
-
         draw_button(colors_button, "Couleurs", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
         draw_button(character_button, "Personnage", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
         draw_button(fullscreen_button,
                     "Plein écran" if not fullscreen else "Fenêtré",
-                    mouse_pos,
-                    current_theme["btn_base"], current_theme["btn_hover"])
+                    mouse_pos, current_theme["btn_base"], current_theme["btn_hover"])
         draw_button(back_button, "Retour", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
 
@@ -183,11 +187,9 @@ while running:
     elif in_color_menu:
         settings_text = title_font.render("Couleurs", True, current_theme["title"])
         screen.blit(settings_text, ((WIDTH - settings_text.get_width())//2, 50))
-
         for rect, theme_name in theme_buttons:
             draw_button(rect, theme_name, mouse_pos,
                         current_theme["btn_base"], current_theme["btn_hover"])
-
         draw_button(back_button, "Retour", mouse_pos,
                     current_theme["btn_base"], current_theme["btn_hover"])
 
@@ -196,28 +198,28 @@ while running:
         settings_text = title_font.render("Personnages", True, current_theme["title"])
         screen.blit(settings_text, ((WIDTH - settings_text.get_width())//2, 50))
 
-        # Boutons à gauche
-        for name, rect in character_images:
+        # Boutons à gauche avec police intermédiaire
+        for name, rect in character_choices:
             draw_button(rect, name, mouse_pos,
-                        current_theme["btn_base"], current_theme["btn_hover"])
+                        current_theme["btn_base"], current_theme["btn_hover"], font=char_font)
 
-        # Aperçu à droite
-        pygame.draw.rect(screen, character_colors[selected_character], preview_rect, 5)
+        # Cadre arrondi élargi à droite
+        draw_rounded_rect_outline(screen, character_colors[selected_character], preview_rect, radius=18)
 
+        # Image du personnage centré dans le cadre
+        img = character_images[selected_character]
+        img_x = preview_rect.x + (preview_rect.width - img.get_width()) // 2
+        img_y = preview_rect.y + (preview_rect.height - img.get_height()) // 2
+        screen.blit(img, (img_x, img_y))
 
-        preview_label = button_font.render(selected_character, True, WHITE)
-        screen.blit(preview_label, (preview_rect.x + 20, preview_rect.y + 20))
-
-        # plus tard l’image du perso choisi
-
-        draw_button(back_button, "Retour", mouse_pos,
-                    current_theme["btn_base"], current_theme["btn_hover"])
+        # Bouton retour plus petit uniquement ici
+        draw_button(back_button_char, "Retour", mouse_pos,
+                    current_theme["btn_base"], current_theme["btn_hover"], font=small_back_font)
 
     # JEU
     else:
         if level is None:
             level = Level1(screen)
-
         level.update()
         level.draw()
 
