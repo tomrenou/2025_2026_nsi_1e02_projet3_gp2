@@ -1,169 +1,275 @@
 import pygame
 from player import Player
-from enemy import Enemy   # ← AJOUT
+from enemy import Enemy
 
 WHITE = (255, 255, 255)
-GREY = (120, 120, 120)
-GREEN = (50, 200, 50)
-RED = (200, 50, 50)
+SKY = (120, 190, 255)
+GRASS = (60, 180, 75)
+DIRT = (110, 75, 40)
+PLATFORM = (90, 90, 110)
+SPIKE = (200, 50, 50)
+YELLOW = (255, 215, 0)
+
+# Position initiale des pièces (pour le respawn)
+COINS_INITIAL = [
+    pygame.Rect(150, 390, 20, 20),
+    pygame.Rect(500, 290, 20, 20),
+    pygame.Rect(190, 190, 20, 20)
+]
 
 class Level1:
-    def __init__(self, screen):
-        self.screen = screen
-        self.heart = pygame.image.load("heart.png").convert_alpha()
-        self.heart = pygame.transform.scale(self.heart, (40, 40))
 
-        self.coins = [
-            pygame.Rect(150, 420, 20, 20),
-            pygame.Rect(500, 320, 20, 20),
-            pygame.Rect(180, 220, 20, 20)
-        ]
-        
-        # armes
-        self.weapon = pygame.Rect(700, 500, 30, 30)
-        self.shoot_cooldown = 0
+    def __init__(self, screen, image_path="Liorbleu.png"):
+
+        self.last_kill_count = 0
+        self.game_timer = 0
+        self.next_bonus_life = 1000  # prochain score pour gagner une vie
+        self.screen = screen
+        self.image_path = image_path
+
+        # Fond
+        self.background_color = SKY
+
+        # Coeurs
+        self.heart = pygame.image.load("heart.png").convert_alpha()
+        self.heart = pygame.transform.scale(self.heart, (38, 38))
+
+        # Joueur
+        self.player = Player(180, 190, image_path)
 
         # Sol
-        self.ground = pygame.Rect(0, 550, 800, 50)
+        self.ground = pygame.Rect(0, 540, 800, 60)
 
         # Plateformes
         self.platforms = [
-            pygame.Rect(100, 450, 200, 20),
-            pygame.Rect(400, 350, 250, 20),
-            pygame.Rect(150, 250, 180, 20)
+            pygame.Rect(90, 430, 190, 22),
+            pygame.Rect(330, 340, 240, 22),
+            pygame.Rect(140, 240, 180, 22)
         ]
 
-        # Obstacles
+        # Pics
         self.obstacles = [
-            pygame.Rect(430, 520, 40, 30),
-            pygame.Rect(600, 520, 40, 30),
-            pygame.Rect(250, 430, 30, 20)
+            pygame.Rect(430, 510, 40, 30),
+            pygame.Rect(600, 510, 40, 30),
+            pygame.Rect(200, 400, 30, 30)
         ]
 
-        # Joueur
-        self.player = Player(180, 190)
+        # Pièces
+        self.coins = [pygame.Rect(c.x, c.y, c.w, c.h) for c in COINS_INITIAL]
+        self.coin_respawn_timer = 0
 
-        # ENNEMIS (nouveau)
+        # Arme
+        self.weapon = pygame.Rect(700, 495, 32, 32)
+
+        # Ennemis
         self.enemies = [
-            Enemy(0, 490, 0, 300),        # Ennemi qui patrouille à gauche
-            Enemy(500, 490, 500, 750)     # Ennemi qui patrouille à droite
+            Enemy(0, 490, 0, 300),
+            Enemy(500, 490, 500, 750)
         ]
         self.enemy_respawn_timer = 0
 
-        # Game over
+        # État jeu
         self.game_over = False
         self.state = "PLAY"
 
+    def reset(self):
+        self.__init__(self.screen, self.image_path)
+
     def update(self):
+        self.game_timer += 1
+
+        # Game Over : touches R et Echap
+        if self.state == "GAME_OVER":
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_r]:
+                self.reset()
+                return
+            if keys[pygame.K_ESCAPE]:
+                pygame.quit()
+                exit()
+            return
+
         self.player.update(self.ground, self.platforms, self.obstacles)
-        
-        # game over
+
+        # Ennemis — on passe le joueur pour la poursuite
         for enemy in self.enemies:
-            enemy.update()
+            enemy.update(self.player)
+
         if self.state != "PLAY":
             return
-        
-        # Collision joueur / ennemi
+
+        # Collision ennemis
         for enemy in self.enemies:
-            if self.player.rect.colliderect(enemy.rect) and not self.player.invincible:
+            if (
+                self.player.rect.colliderect(enemy.rect)
+                and not self.player.invincible
+            ):
                 self.player.lives -= 1
                 self.player.rect.topleft = (180, 190)
                 self.player.invincible = True
                 self.player.invincible_timer = 60
+                enemy.on_hit_player()
+                self.last_kill_count = enemy.kill_count
+
+        # Balles / ennemis
         for bullet in self.player.bullets[:]:
             for enemy in self.enemies[:]:
-                if bullet.colliderect(enemy.rect):
-                    self.player.bullets.remove(bullet)
-                    self.enemies.remove(enemy)
+                if bullet["rect"].colliderect(enemy.rect):
+                    if bullet in self.player.bullets:
+                        self.player.bullets.remove(bullet)
+                    if enemy in self.enemies:
+                        self.enemies.remove(enemy)
                     self.player.score += 50
                     break
+
+        # Respawn ennemis avec mémoire agressivité - 1
         if len(self.enemies) == 0:
             if self.enemy_respawn_timer == 0:
                 self.enemy_respawn_timer = 300
             else:
                 self.enemy_respawn_timer -= 1
-
                 if self.enemy_respawn_timer <= 0:
-                    self.enemies = [
-                        Enemy(0, 490, 0, 300),
-                        Enemy(500, 490, 500, 750)
-                    ]
+                    e1 = Enemy(0, 490, 0, 300)
+                    e2 = Enemy(500, 490, 500, 750)
+                    prev = max(0, self.last_kill_count - 1)
+                    for e in [e1, e2]:
+                        if prev > 0:
+                            e.aggressive = True
+                            e.kill_count = prev
+                            e.chase_speed = min(1.5 + prev * 0.5, 5)
+                    self.enemies = [e1, e2]
                     self.enemy_respawn_timer = 0
 
-        # ramassage pièces
+        # Pièces
         for coin in self.coins[:]:
             if self.player.rect.colliderect(coin):
                 self.coins.remove(coin)
                 self.player.score += 10
 
-        # ramassage arme
+        # Réapparition pièces après 10 secondes
+        if len(self.coins) == 0:
+            if self.coin_respawn_timer == 0:
+                self.coin_respawn_timer = 600
+            else:
+                self.coin_respawn_timer -= 1
+                if self.coin_respawn_timer <= 0:
+                    self.coins = [pygame.Rect(c.x, c.y, c.w, c.h) for c in COINS_INITIAL]
+                    self.coin_respawn_timer = 0
+
+        # Arme
         if self.weapon and self.player.rect.colliderect(self.weapon):
             self.player.has_weapon = True
             self.weapon = None
-        if self.shoot_cooldown > 0:
-            self.shoot_cooldown -= 1
 
-        # game over
-        if self.game_over:
-            return
+        # Vie bonus tous les 1000 points (max 5 vies)
+        if self.player.score >= self.next_bonus_life:
+            if self.player.lives < 5:
+                self.player.lives += 1
+            self.next_bonus_life += 1000
+
+        # Game over
         if self.player.lives <= 0:
             self.game_over = True
-        if self.player.lives <= 0:
             self.state = "GAME_OVER"
 
     def draw(self):
-        pygame.draw.rect(self.screen, GREEN, self.ground)
 
-        for i in range(self.player.lives):
-            self.screen.blit(self.heart, (10 + i * 45, 10))
+        # Fond ciel
+        self.screen.fill(self.background_color)
 
-        for p in self.platforms:
-            pygame.draw.rect(self.screen, GREY, p)
+        # Soleil
+        pygame.draw.circle(self.screen, (255, 220, 80), (700, 90), 50)
 
-        for o in self.obstacles:
-            pygame.draw.rect(self.screen, RED, o)
+        # Nuages
+        pygame.draw.circle(self.screen, WHITE, (130, 90), 30)
+        pygame.draw.circle(self.screen, WHITE, (165, 90), 40)
+        pygame.draw.circle(self.screen, WHITE, (205, 90), 30)
+        pygame.draw.circle(self.screen, WHITE, (500, 140), 25)
+        pygame.draw.circle(self.screen, WHITE, (530, 140), 35)
+        pygame.draw.circle(self.screen, WHITE, (565, 140), 25)
+
+        # Sol terre
+        pygame.draw.rect(self.screen, DIRT, self.ground)
+
+        # Herbe
+        pygame.draw.rect(self.screen, GRASS, (0, 540, 800, 12))
+
+        # Plateformes
+        for platform in self.platforms:
+            pygame.draw.rect(self.screen, PLATFORM, platform, border_radius=8)
+            pygame.draw.rect(self.screen, (140, 140, 170), platform, 3, border_radius=8)
+
+        # Pics
+        for obstacle in self.obstacles:
+            x = obstacle.x
+            y = obstacle.y
+            pygame.draw.polygon(
+                self.screen, SPIKE,
+                [(x, y + 30), (x + 15, y), (x + 30, y + 30)]
+            )
 
         # Pièces
         for coin in self.coins:
-            pygame.draw.circle(self.screen, (255, 215, 0), coin.center, 10)
+            pygame.draw.circle(self.screen, (255, 215, 0), coin.center, 11)
+            pygame.draw.circle(self.screen, (255, 240, 120), coin.center, 6)
+
+        # Compte à rebours réapparition pièces
+        if len(self.coins) == 0 and self.coin_respawn_timer > 0:
+            font_coins = pygame.font.SysFont(None, 28)
+            secs = self.coin_respawn_timer // 60 + 1
+            txt = font_coins.render(f"Pièces dans {secs}s", True, YELLOW)
+            self.screen.blit(txt, (340, 55))
 
         # Arme
         if self.weapon:
-            pygame.draw.rect(self.screen, (0, 0, 255), self.weapon)
+            pygame.draw.rect(self.screen, (40, 40, 40), self.weapon, border_radius=5)
+            pygame.draw.rect(
+                self.screen, (0, 120, 255),
+                (self.weapon.x + 12, self.weapon.y - 10, 8, 15),
+                border_radius=3
+            )
 
+        # Ennemis
         for enemy in self.enemies:
             enemy.draw(self.screen)
 
+        # Joueur
         self.player.draw(self.screen)
 
-        font = pygame.font.SysFont(None, 35)
+        # Coeurs
+        for i in range(self.player.lives):
+            self.screen.blit(self.heart, (10 + i * 45, 10))
 
-        score_text = font.render(f"Score: {self.player.score}", True, WHITE)
-        self.screen.blit(score_text, (650, 10))
+        # Score
+        font = pygame.font.SysFont("arialblack", 28)
+        score_text = font.render(f"{self.player.score}", True, WHITE)
+        self.screen.blit(score_text, (730, 10))
 
-        weapon_text = font.render(
-            f"Arme: {'Oui' if self.player.has_weapon else 'Non'}",
-            True,
-            WHITE
-        )
-        self.screen.blit(weapon_text, (620, 45))
+        # --- TIMER ---
+        total_seconds = self.game_timer // 60
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        font_timer = pygame.font.SysFont("arialblack", 28)
+        timer_text = font_timer.render(f"{minutes:02d}:{seconds:02d}", True, WHITE)
+        self.screen.blit(timer_text, (370, 10))
 
-        # game over
-        if self.game_over:
-            font = pygame.font.SysFont(None, 80)
-            text = font.render("GAME OVER", True, (255, 0, 0))
-            self.screen.blit(text, (250, 250))
-            return
+        # HUD munitions
+        self.player.draw_hud(self.screen)
+
+        # GAME OVER
         if self.state == "GAME_OVER":
-            font = pygame.font.SysFont(None, 60)
+            overlay = pygame.Surface((800, 600))
+            overlay.set_alpha(170)
+            overlay.fill((0, 0, 0))
+            self.screen.blit(overlay, (0, 0))
 
-            title = font.render("GAME OVER", True, (255, 0, 0))
-            restart = font.render("R - Restart", True, (255, 255, 255))
-            menu = font.render("M - Menu", True, (255, 255, 255))
-            quit_text = font.render("Q - Quitter", True, (255, 255, 255))
+            font_big = pygame.font.SysFont("arialblack", 80)
+            font_med = pygame.font.SysFont("arialblack", 40)
 
-            self.screen.blit(title, (260, 150))
-            self.screen.blit(restart, (280, 300))
-            self.screen.blit(menu, (300, 360))
-            self.screen.blit(quit_text, (280, 420))
-            return
+            title     = font_big.render("GAME OVER", True, (255, 60, 60))
+            restart   = font_med.render("R - Restart", True, WHITE)
+            quit_text = font_med.render("Echap - Quitter", True, WHITE)
+
+            self.screen.blit(title,     (170, 180))
+            self.screen.blit(restart,   (260, 320))
+            self.screen.blit(quit_text, (220, 390))
